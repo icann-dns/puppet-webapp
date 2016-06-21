@@ -60,7 +60,11 @@ define webapp::python (
     require => Vcsrepo[$approot],
   }
   ensure_resource('python::pip', $pip_packages,
-      { 'virtualenv' => $approot, require => Vcsrepo[$approot] })
+      {
+      'approot'     => $approot,
+      'virtual_env' => $name,
+      'require'     => Vcsrepo[$approot],
+      })
 
   if $use_ssl {
     apache::vhost { "${domain_name}-redirect":
