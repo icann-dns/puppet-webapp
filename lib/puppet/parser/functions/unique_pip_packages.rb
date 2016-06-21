@@ -3,7 +3,7 @@
 #
 module Puppet::Parser::Functions
   newfunction(:unique_pip_packages, :type => :rvalue, :doc => <<-EOS
-This function a uniqu has to be used tith python::pip its main purpose is to allow one to install a package in multible virtual envs
+This function converts an array of pip package names to a hash of python::pip objects to be used with create_resources()
 
 *Examples:*
     flatten(['pip-package1', 'pip-packae2'], 'exmple', 'File["bla"]')
