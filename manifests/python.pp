@@ -59,7 +59,7 @@ define webapp::python (
     owner   => $git_user,
     require => Vcsrepo[$approot],
   }
-  ensure_resource('python::pip', $pip_packages,
+  ensure_resource('webapp::python::pip', $pip_packages,
       {
       'approot'     => $approot,
       'virtual_env' => $name,
