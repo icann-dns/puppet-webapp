@@ -59,12 +59,8 @@ define webapp::python (
     owner   => $git_user,
     require => Vcsrepo[$approot],
   }
-  ensure_resource('webapp::python::pip', $pip_packages,
-      {
-      'approot'     => $approot,
-      'virtual_env' => $name,
-      'require'     => Vcsrepo[$approot],
-      })
+  $pip_packages_resources = unique_pip_packages($pip_packages, $approot, Vcsrepo[$approot])
+  create_resources(python::pip, $pip_packages_resources)
 
   if $use_ssl {
     apache::vhost { "${domain_name}-redirect":
