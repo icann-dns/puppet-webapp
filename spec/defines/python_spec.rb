@@ -83,9 +83,9 @@ describe 'webapp::python' do
           it {is_expected.to contain_package('curl') }
         end
         context 'pip_packages' do
-          before { params.merge!( pip_packages: [] ) }
+          before { params.merge!( pip_packages: ['Flask'] ) }
           it { is_expected.to compile }
-          # Add Check to validate change was successful
+          it { is_expected.to contain_python__pip('/srv/www/test_app-Flask') }
         end
         context 'git_source' do
           before { params.merge!( git_source: 'git@git.example.com:foo/bar.git' ) }
