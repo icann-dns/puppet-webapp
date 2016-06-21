@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/icann-dns/puppet-webapp.svg?branch=master)](https://travis-ci.org/icann-dns/puppet-webapp)
+[![Puppet Forge](https://img.shields.io/puppetforge/v/icann/webapp.svg?maxAge=2592000)](https://forge.puppet.com/icann/webapp)
+[![Puppet Forge Downloads](https://img.shields.io/puppetforge/dt/icann/webapp.svg?maxAge=2592000)](https://forge.puppet.com/icann/webapp)
 # webapp
 
 #### Table of Contents
