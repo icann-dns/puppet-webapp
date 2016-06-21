@@ -83,9 +83,20 @@ describe 'webapp::python' do
           it {is_expected.to contain_package('curl') }
         end
         context 'pip_packages' do
-          before { params.merge!( pip_packages: ['Flask'] ) }
+          before { params.merge!( pip_packages: ['Flask', 'requests'] ) }
           it { is_expected.to compile }
-          it { is_expected.to contain_python__pip('/srv/www/test_app-Flask') }
+          it do 
+            is_expected.to contain_python__pip('/srv/www/test_app-Flask').with(
+              'virtualenv' => '/srv/www/test_app',
+              'pkgname'    => 'Flask',
+            )
+          end
+          it do 
+            is_expected.to contain_python__pip('/srv/www/test_app-requests').with(
+              'virtualenv' => '/srv/www/test_app',
+              'pkgname'    => 'requests',
+            )
+          end
         end
         context 'git_source' do
           before { params.merge!( git_source: 'git@git.example.com:foo/bar.git' ) }

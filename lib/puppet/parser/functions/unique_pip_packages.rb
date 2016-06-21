@@ -28,7 +28,7 @@ Would return: {
     _pip_packages.each do |_pip_package|
       pip_defines["#{_virtualenv}-#{_pip_package}"] = {
         'virtualenv' => _virtualenv,
-        'pkgname' => _pip_packages,
+        'pkgname' => _pip_package,
         'require' => _require,
       }
     end
