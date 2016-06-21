@@ -1,0 +1,15 @@
+fixtures:
+    symlinks:
+      webapp: "#{source_dir}"
+    repositories:
+      stdlib:
+        repo: https://github.com/puppetlabs/puppetlabs-stdlib.git
+      vcsrepo:
+        repo: https://github.com/puppetlabs/puppetlabs-vcsrepo.git
+      apache:
+        repo: https://github.com/puppetlabs/puppetlabs-apache.git
+      concat:
+        repo: https://github.com/puppetlabs/puppetlabs-concat.git
+      python:
+        repo: https://github.com/stankevich/puppet-python.git
+    forge_modules:

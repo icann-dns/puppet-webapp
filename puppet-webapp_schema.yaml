@@ -1,0 +1,61 @@
+# Created using puppet-retrospec - https://github.com/nwops/puppet-retrospec
+# This schema file can be used to validate hiera data
+# http://www.kuwata-lab.com/kwalify/ruby/users-guide.01.html#schema
+# To validate your hiera data against this schema install the kwalify gem
+# 1. gem install kwalify
+# 2. kwalify -lf /Users/john.bond/git/puppet-webapp/puppet-webapp_schema.yaml hiera_data_file.yaml
+# By default this schema is generic and only covers basic parameter types.
+# You should update the schema to match your expected data types in your puppet classes
+# or anywhere else you call hiera using the hiera() function.
+# This schema contains 10 entries.
+--- 
+  type: map
+  mapping: 
+    hostclass: 
+      type: map
+      mapping: 
+        "webapp::web_root": 
+          type: any
+          required: false
+        "webapp::python_web_apps": 
+          type: map
+          mapping: 
+            "=": 
+              type: any
+              required: false
+          required: false
+    definition: 
+      type: map
+      mapping: 
+        "webapp::python::system_packages": 
+          type: seq
+          sequence: 
+            - type: str
+          required: false
+        "webapp::python::pip_packages": 
+          type: seq
+          sequence: 
+            - type: str
+          required: false
+        "webapp::python::git_source": 
+          type: any
+          required: false
+        "webapp::python::git_revision": 
+          type: str
+          required: false
+        "webapp::python::git_user": 
+          type: str
+          required: false
+        "webapp::python::domain_name": 
+          type: any
+          required: false
+        "webapp::python::wsgi_script_aliases": 
+          type: str
+          required: false
+        "webapp::python::cron_jobs": 
+          type: map
+          mapping: 
+            "=": 
+              type: any
+              required: false
+          required: false
