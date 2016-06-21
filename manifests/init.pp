@@ -8,7 +8,7 @@ class webapp (
   validate_absolute_path($web_root)
   validate_hash($python_apps)
 
-  ensure_resource('file', $web_root, { 'ensure' => 'directory' })
+  ensure_resource('file', $web_root, { 'ensure' => 'directory', mode => '0777' })
   create_resources(webapp::python, $python_apps)
   include apache
 
