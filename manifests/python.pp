@@ -8,7 +8,7 @@ define webapp::python (
   $git_user            = 'root',
   $domain_name         = undef,
   $wsgi_script_aliases = 'webapp.wsgi',
-  $wsgi_user           = 'root',
+  $wsgi_user           = 'www-data',
   $use_ssl             = false,
   $ssl_cert            = undef,
   $ssl_key             = undef,
