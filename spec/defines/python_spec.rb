@@ -47,7 +47,6 @@ describe 'webapp::python' do
             .with(
               'ensure'   => 'latest',
               'provider' => 'git',
-              'require'  => 'Package[git]',
               'revision' => 'master',
               'source'   => 'git@git.example.com:root/example.git',
               'user'     => 'root'
@@ -72,6 +71,8 @@ describe 'webapp::python' do
               'wsgi_script_aliases' => /webapp.wsgi/
             )
         end
+        it { is_expected.to_not contain_apache__vhost('test.example.com-redirect') }
+        it { is_expected.to_not contain_apache__vhost('test.example.com-ssl') }
       end
 
       describe 'Change Defaults' do
@@ -94,7 +95,6 @@ describe 'webapp::python' do
               .with(
                 'ensure'   => 'latest',
                 'provider' => 'git',
-                'require'  => 'Package[git]',
                 'revision' => 'master',
                 'source'   => 'git@git.example.com:foo/bar.git',
                 'user'     => 'root'
@@ -110,7 +110,6 @@ describe 'webapp::python' do
               .with(
                 'ensure'   => 'latest',
                 'provider' => 'git',
-                'require'  => 'Package[git]',
                 'revision' => 'foobar',
                 'source'   => 'git@git.example.com:root/example.git',
                 'user'     => 'root'
@@ -125,7 +124,6 @@ describe 'webapp::python' do
               .with(
                 'ensure'   => 'latest',
                 'provider' => 'git',
-                'require'  => 'Package[git]',
                 'revision' => 'master',
                 'source'   => 'git@git.example.com:root/example.git',
                 'user'     => 'foobar'
@@ -159,6 +157,40 @@ describe 'webapp::python' do
                 'servername'          => 'test.example.com',
                 'wsgi_daemon_process' => 'test_app-wsgi-webapp',
                 'wsgi_script_aliases' => /foobar/
+              )
+          end
+        end
+        context 'use ssl' do
+          before { params.merge!( 
+              use_ssl:  true,
+              ssl_cert: '/foo.cert',
+              ssl_key:  '/foo.key',
+          ) }
+          it { is_expected.to compile }
+          it { is_expected.to_not contain_apache__vhost('test.example.com') }
+          it do
+            is_expected.to contain_apache__vhost('test.example.com-redirect')
+              .with(
+                'docroot'         => '/srv/www/test_app/',
+                'port'            => '80',
+                'require'         => 'Vcsrepo[/srv/www/test_app]',
+                'servername'      => 'test.example.com',
+                'redirect_status' => 'permanent',
+                'redirect_dest'   => 'https://test.example.com/',
+              )
+          end
+          it do
+            is_expected.to contain_apache__vhost('test.example.com-ssl')
+              .with(
+                'docroot'             => '/srv/www/test_app/',
+                'port'                => '443',
+                'require'             => 'Vcsrepo[/srv/www/test_app]',
+                'servername'          => 'test.example.com',
+                'wsgi_daemon_process' => 'test_app-wsgi-webapp',
+                'wsgi_script_aliases' => /webapp.wsgi/,
+                'ssl'                 => 'true',
+                'ssl_cert'            => '/foo.cert',
+                'ssl_key'             => '/foo.key',
               )
           end
         end
@@ -201,6 +233,36 @@ describe 'webapp::python' do
         end
         context 'cron_jobs' do
           before { params.merge!( cron_jobs: true ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'use_ssl' do
+          before { params.merge!( use_ssl: 'foobar' ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'use ssl no certs or key' do
+          before { params.merge!( use_ssl: true ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'use ssl no  key' do
+          before { params.merge!( 
+              use_ssl: true ,
+              ssl_cert: '/foo.cert',
+          ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'use ssl no cert' do
+          before { params.merge!( 
+              use_ssl: true ,
+              ssl_key: '/foo.cert',
+          ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'ssl_cert' do
+          before { params.merge!( use_ssl: true, ssl_cert: true ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'ssl_key' do
+          before { params.merge!( use_ssl: true, ssl_key: true ) }
           it { expect { subject.call }.to raise_error(Puppet::Error) }
         end
       end

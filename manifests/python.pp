@@ -8,6 +8,11 @@ define webapp::python (
   $git_user            = 'root',
   $domain_name         = undef,
   $wsgi_script_aliases = 'webapp.wsgi',
+  $wsgi_user           = 'root',
+  $use_ssl             = false,
+  $ssl_cert            = undef,
+  $ssl_key             = undef,
+  $ssl_chain           = undef,
   $cron_jobs           = {},
 ) {
   validate_array($system_packages)
@@ -23,12 +28,22 @@ define webapp::python (
   }
   validate_string($domain_name)
   validate_string($wsgi_script_aliases)
+  validate_bool($use_ssl)
+  if $use_ssl {
+    validate_absolute_path($ssl_cert)
+    validate_absolute_path($ssl_key)
+  }
+  if $ssl_chain {
+    validate_absolute_path($ssl_chain)
+  }
   validate_hash($cron_jobs)
 
   $approot = "${webapp::web_root}/${name}"
 
   ensure_packages(['git'])
   ensure_packages($system_packages)
+
+  include apache::mod::wsgi
 
   vcsrepo { $approot:
     ensure   => latest,
@@ -47,15 +62,47 @@ define webapp::python (
   ensure_resource('python::pip', $pip_packages,
       { 'virtualenv' => $approot, require => Vcsrepo[$approot] })
 
-  apache::vhost { $domain_name:
-    servername          => $domain_name,
-    docroot             => "${approot}/",
-    wsgi_daemon_process => "${name}-wsgi-webapp",
-    port                => 80,
-    wsgi_script_aliases => {
-      '/' => "${approot}/${wsgi_script_aliases}"
-    },
-    require             => Vcsrepo[$approot];
+  if $use_ssl {
+    apache::vhost { "${domain_name}-redirect":
+      servername      => $domain_name,
+      docroot         => "${approot}/",
+      port            => 80,
+      redirect_status => 'permanent',
+      redirect_dest   => "https://${domain_name}/",
+      require         => Vcsrepo[$approot],
+    }
+    apache::vhost { "${domain_name}-ssl":
+      servername                  => $domain_name,
+      docroot                     => "${approot}/",
+      port                        => 443,
+      ssl                         => true,
+      ssl_cert                    => $ssl_cert,
+      ssl_key                     => $ssl_key,
+      ssl_chain                   => $ssl_chain,
+      ssl_protocol                => 'all -SSLv2 -SSLv3',
+      wsgi_daemon_process         => "${name}-wsgi-webapp",
+      wsgi_script_aliases         => {
+        '/' => "${approot}/${wsgi_script_aliases}"
+      },
+      wsgi_daemon_process_options =>  {
+        'user' => $wsgi_user
+      },
+      require                     => Vcsrepo[$approot],
+    }
+  } else {
+    apache::vhost { $domain_name:
+      servername                  => $domain_name,
+      docroot                     => "${approot}/",
+      wsgi_daemon_process         => "${name}-wsgi-webapp",
+      port                        => 80,
+      wsgi_daemon_process_options =>  {
+        'user' => $wsgi_user
+      },
+      wsgi_script_aliases         => {
+        '/' => "${approot}/${wsgi_script_aliases}"
+      },
+      require                     => Vcsrepo[$approot],
+    }
   }
   create_resources(cron, $cron_jobs)
 }
