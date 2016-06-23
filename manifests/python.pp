@@ -5,10 +5,9 @@ define webapp::python (
   $pip_packages        = [],
   $git_source          = undef,
   $git_revision        = 'master',
-  $git_user            = 'root',
+  $user                = 'www-data',
   $domain_name         = undef,
   $wsgi_script_aliases = 'webapp.wsgi',
-  $wsgi_user           = 'www-data',
   $use_ssl             = false,
   $ssl_cert            = undef,
   $ssl_key             = undef,
@@ -22,7 +21,7 @@ define webapp::python (
   }
   validate_string($git_source)
   validate_string($git_revision)
-  validate_string($git_user)
+  validate_string($user)
   if ! $domain_name {
     fail("you must specify domain_name for webapp::define[${name}]")
   }
@@ -48,7 +47,7 @@ define webapp::python (
   vcsrepo { $approot:
     ensure   => latest,
     provider => git,
-    user     => $git_user,
+    user     => $user,
     revision => $git_revision,
     source   => $git_source,
     require  => Package[$system_packages],
@@ -56,7 +55,7 @@ define webapp::python (
   python::virtualenv {$approot:
     ensure  => present,
     path    => ['/bin', '/usr/bin', '/usr/sbin', '/usr/local/bin'],
-    owner   => $git_user,
+    owner   => $user,
     require => Vcsrepo[$approot],
   }
   $pip_packages_resources = unique_pip_packages($pip_packages, $approot, Vcsrepo[$approot])
@@ -85,7 +84,7 @@ define webapp::python (
         '/' => "${approot}/${wsgi_script_aliases}"
       },
       wsgi_daemon_process_options =>  {
-        'user' => $wsgi_user
+        'user' => $user
       },
       require                     => Vcsrepo[$approot],
     }
@@ -96,7 +95,7 @@ define webapp::python (
       wsgi_daemon_process         => "${name}-wsgi-webapp",
       port                        => 80,
       wsgi_daemon_process_options =>  {
-        'user' => $wsgi_user
+        'user' => $user
       },
       wsgi_script_aliases         => {
         '/' => "${approot}/${wsgi_script_aliases}"
