@@ -1,8 +1,8 @@
 {
   "name": "icann-webapp",
-  "version": "0.1.2",
+  "version": "0.1.1",
   "author": "john.bond@icann.org",
-  "summary": "Installs and configuers webapp from nic.cz",
+  "summary": "Installs and configuers generic webapps",
   "license": "Apache-2.0",
   "source": "https://github.com/icann-dns/puppet-webapp",
   "project_page": "https://github.com/icann-dns/puppet-webapp",
