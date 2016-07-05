@@ -1,3 +1,6 @@
+## 5 Jul 2016 0.1.2
+add abbility to manage static sites
+
 ## 23 Jun 2016 0.1.1
 Improve user management
 
