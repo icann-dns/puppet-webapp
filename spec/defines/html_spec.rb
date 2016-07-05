@@ -23,6 +23,7 @@ describe 'webapp::html' do
       domain_name: 'test.example.com',
       #docroot_subfolder: '/'
       #wsgi_script_aliases: "webapp.wsgi",
+      #options: ['Indexes','FollowSymLinks','MultiViews']
       #cron_jobs: {},
     }
   end
@@ -59,6 +60,7 @@ describe 'webapp::html' do
               'docroot'             => '/srv/www/test_app/',
               'port'                => '80',
               'servername'          => 'test.example.com',
+              'options'             => ['Indexes','FollowSymLinks','MultiViews'],
             )
         end
         it { is_expected.to_not contain_apache__vhost('test.example.com-redirect') }
