@@ -96,7 +96,6 @@ describe 'webapp::html' do
           it do
             is_expected.to contain_file('/srv/www/test_app')
               .with(
-                'ensure'  => 'directory',
                 'source'  => 'puppet:///foo',
                 'recurse' => true,
               )
