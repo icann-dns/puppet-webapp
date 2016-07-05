@@ -185,6 +185,19 @@ describe 'webapp::html' do
               )
           end
         end
+        context 'options' do
+          before { params.merge!( options: ['foobar'] ) }
+          it { is_expected.to compile }
+          # Add Check to validate change was successful
+          it do
+            is_expected.to contain_apache__vhost('test.example.com')
+              .with(
+                'docroot'             => '/srv/www/test_app/',
+                'port'                => '80',
+                'options'             => ['foobar'],
+              )
+          end
+        end
         context 'cron_jobs' do
           before { params.merge!( cron_jobs: {} ) }
           it { is_expected.to compile }
@@ -266,6 +279,10 @@ describe 'webapp::html' do
         end
         context 'ssl_key' do
           before { params.merge!( use_ssl: true, ssl_key: true ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'options' do
+          before { params.merge!( options: true ) }
           it { expect { subject.call }.to raise_error(Puppet::Error) }
         end
       end

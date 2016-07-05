@@ -12,6 +12,7 @@ define webapp::html (
   $ssl_cert            = undef,
   $ssl_key             = undef,
   $ssl_chain           = undef,
+  $options             = ['Indexes','FollowSymLinks','MultiViews'],
   $cron_jobs           = {},
 ) {
   validate_array($system_packages)
@@ -42,6 +43,7 @@ define webapp::html (
   if $ssl_chain {
     validate_absolute_path($ssl_chain)
   }
+  validate_array($options)
   validate_hash($cron_jobs)
 
   $approot = "${webapp::web_root}/${name}"
@@ -62,6 +64,7 @@ define webapp::html (
     file { $approot:
       ensure  => directory,
       source  => $puppet_source,
+      purge   => false,
       recurse => true,
     }
   }
@@ -82,12 +85,14 @@ define webapp::html (
       ssl_key      => $ssl_key,
       ssl_chain    => $ssl_chain,
       ssl_protocol => 'all -SSLv2 -SSLv3',
+      options      => $options,
     }
   } else {
     apache::vhost { $domain_name:
       servername => $domain_name,
       docroot    => "${approot}${docroot_subfolder}",
       port       => 80,
+      options    => $options,
     }
   }
   create_resources(cron, $cron_jobs)

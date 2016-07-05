@@ -13,6 +13,7 @@ define webapp::python (
   $ssl_cert            = undef,
   $ssl_key             = undef,
   $ssl_chain           = undef,
+  $options             = ['Indexes','FollowSymLinks','MultiViews'],
   $cron_jobs           = {},
 ) {
   validate_array($system_packages)
@@ -37,6 +38,7 @@ define webapp::python (
   if $ssl_chain {
     validate_absolute_path($ssl_chain)
   }
+  validate_array($options)
   validate_hash($cron_jobs)
 
   $approot = "${webapp::web_root}/${name}"
@@ -88,6 +90,7 @@ define webapp::python (
       wsgi_daemon_process_options =>  {
         'user' => $user
       },
+      options                     => $options,
       require                     => Vcsrepo[$approot],
     }
   } else {
@@ -102,6 +105,7 @@ define webapp::python (
       wsgi_script_aliases         => {
         '/' => "${approot}/${wsgi_script_aliases}"
       },
+      options                     => $options,
       require                     => Vcsrepo[$approot],
     }
   }
