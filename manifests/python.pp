@@ -73,6 +73,7 @@ define webapp::python (
       redirect_status => 'permanent',
       redirect_dest   => "https://${domain_name}/",
       require         => Vcsrepo[$approot],
+      manage_docroot  => false,
     }
     apache::vhost { "${domain_name}-ssl":
       servername                  => $domain_name,
@@ -91,6 +92,7 @@ define webapp::python (
         'user' => $user
       },
       options                     => $options,
+      manage_docroot              => false,
       require                     => Vcsrepo[$approot],
     }
   } else {
@@ -106,6 +108,7 @@ define webapp::python (
         '/' => "${approot}/${wsgi_script_aliases}"
       },
       options                     => $options,
+      manage_docroot              => false,
       require                     => Vcsrepo[$approot],
     }
   }

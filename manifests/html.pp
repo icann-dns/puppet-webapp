@@ -74,24 +74,27 @@ define webapp::html (
       port            => 80,
       redirect_status => 'permanent',
       redirect_dest   => "https://${domain_name}/",
+      manage_docroot  => false,
     }
     apache::vhost { "${domain_name}-ssl":
-      servername   => $domain_name,
-      docroot      => "${approot}${docroot_subfolder}",
-      port         => 443,
-      ssl          => true,
-      ssl_cert     => $ssl_cert,
-      ssl_key      => $ssl_key,
-      ssl_chain    => $ssl_chain,
-      ssl_protocol => 'all -SSLv2 -SSLv3',
-      options      => $options,
+      servername     => $domain_name,
+      docroot        => "${approot}${docroot_subfolder}",
+      port           => 443,
+      ssl            => true,
+      ssl_cert       => $ssl_cert,
+      ssl_key        => $ssl_key,
+      ssl_chain      => $ssl_chain,
+      ssl_protocol   => 'all -SSLv2 -SSLv3',
+      options        => $options,
+      manage_docroot => false,
     }
   } else {
     apache::vhost { $domain_name:
-      servername => $domain_name,
-      docroot    => "${approot}${docroot_subfolder}",
-      port       => 80,
-      options    => $options,
+      servername     => $domain_name,
+      docroot        => "${approot}${docroot_subfolder}",
+      port           => 80,
+      options        => $options,
+      manage_docroot => false,
     }
   }
   create_resources(cron, $cron_jobs)
