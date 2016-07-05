@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'shared_contexts'
 
-describe 'webapp::python' do
+describe 'webapp::html' do
   # by default the hiera integration uses hiera data from the shared_contexts.rb file
   # but basically to mock hiera you first need to add a key/value pair
   # to the specific context in the spec/shared_contexts.rb file
@@ -54,22 +54,11 @@ describe 'webapp::python' do
             )
         end
         it do
-          is_expected.to contain_python__virtualenv('/srv/www/test_app')
-            .with(
-              'ensure'  => 'present',
-              'owner'   => 'www-data',
-              'require' => 'Vcsrepo[/srv/www/test_app]'
-            )
-        end
-        it do
           is_expected.to contain_apache__vhost('test.example.com')
             .with(
               'docroot'             => '/srv/www/test_app/',
               'port'                => '80',
-              'require'             => 'Vcsrepo[/srv/www/test_app]',
               'servername'          => 'test.example.com',
-              'wsgi_daemon_process' => 'test_app-wsgi-webapp',
-              'wsgi_script_aliases' => /webapp.wsgi/
             )
         end
         it { is_expected.to_not contain_apache__vhost('test.example.com-redirect') }
@@ -83,25 +72,10 @@ describe 'webapp::python' do
           it {is_expected.to contain_package('git') }
           it {is_expected.to contain_package('curl') }
         end
-        context 'pip_packages' do
-          before { params.merge!( pip_packages: ['Flask', 'requests'] ) }
-          it { is_expected.to compile }
-          it do 
-            is_expected.to contain_python__pip('/srv/www/test_app-Flask').with(
-              'virtualenv' => '/srv/www/test_app',
-              'pkgname'    => 'Flask',
-            )
-          end
-          it do 
-            is_expected.to contain_python__pip('/srv/www/test_app-requests').with(
-              'virtualenv' => '/srv/www/test_app',
-              'pkgname'    => 'requests',
-            )
-          end
-        end
         context 'git_source' do
           before { params.merge!( git_source: 'git@git.example.com:foo/bar.git' ) }
           it { is_expected.to compile }
+          it { is_expected.to_not contain_file('/srv/www/test_app') }
           it do
             is_expected.to contain_vcsrepo('/srv/www/test_app')
               .with(
@@ -110,6 +84,19 @@ describe 'webapp::python' do
                 'revision' => 'master',
                 'source'   => 'git@git.example.com:foo/bar.git',
                 'user'     => 'www-data'
+              )
+          end
+        end
+        context 'puppet_source' do
+          before { params.merge!( git_source: :undef, puppet_source: 'puppet:///foo' ) }
+          it { is_expected.to compile }
+          it { is_expected.to_not contain_vcsrepo('/srv/www/test_app') }
+          it do
+            is_expected.to contain_file('/srv/www/test_app')
+              .with(
+                'ensure'  => 'directory',
+                'source'  => 'puppet:///foo',
+                'recurse' => true,
               )
           end
         end
@@ -151,9 +138,7 @@ describe 'webapp::python' do
               .with(
                 'docroot'             => '/srv/www/test_app/',
                 'port'                => '80',
-                'require'             => 'Vcsrepo[/srv/www/test_app]',
                 'servername'          => 'foo.example.com',
-                'wsgi_daemon_process' => 'test_app-wsgi-webapp',
               )
           end
         end
@@ -165,21 +150,6 @@ describe 'webapp::python' do
             is_expected.to contain_apache__vhost('test.example.com')
               .with(
                 'docroot'             => '/srv/www/test_app/foo',
-              )
-          end
-        end
-        context 'wsgi_script_aliases' do
-          before { params.merge!( wsgi_script_aliases: 'foobar' ) }
-          it { is_expected.to compile }
-          it do
-            is_expected.to contain_apache__vhost('test.example.com')
-              .with(
-                'docroot'             => '/srv/www/test_app/',
-                'port'                => '80',
-                'require'             => 'Vcsrepo[/srv/www/test_app]',
-                'servername'          => 'test.example.com',
-                'wsgi_daemon_process' => 'test_app-wsgi-webapp',
-                'wsgi_script_aliases' => /foobar/
               )
           end
         end
@@ -196,7 +166,6 @@ describe 'webapp::python' do
               .with(
                 'docroot'         => '/srv/www/test_app/',
                 'port'            => '80',
-                'require'         => 'Vcsrepo[/srv/www/test_app]',
                 'servername'      => 'test.example.com',
                 'redirect_status' => 'permanent',
                 'redirect_dest'   => 'https://test.example.com/',
@@ -207,10 +176,7 @@ describe 'webapp::python' do
               .with(
                 'docroot'             => '/srv/www/test_app/',
                 'port'                => '443',
-                'require'             => 'Vcsrepo[/srv/www/test_app]',
                 'servername'          => 'test.example.com',
-                'wsgi_daemon_process' => 'test_app-wsgi-webapp',
-                'wsgi_script_aliases' => /webapp.wsgi/,
                 'ssl'                 => 'true',
                 'ssl_cert'            => '/foo.cert',
                 'ssl_key'             => '/foo.key',
@@ -230,12 +196,20 @@ describe 'webapp::python' do
           before { params.merge!( system_packages: true ) }
           it { expect { subject.call }.to raise_error(Puppet::Error) }
         end
-        context 'pip_packages' do
-          before { params.merge!( pip_packages: true ) }
-          it { expect { subject.call }.to raise_error(Puppet::Error) }
-        end
         context 'git_source' do
           before { params.merge!( git_source: true ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'puppet_source' do
+          before { params.merge!( git_source: true ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'git_source and puppet_source' do
+          before { params.merge!( git_source: 'foo', puppet_source: 'bar' ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'no git_source and no puppet_source' do
+          before { params.merge!( git_source: :undef, puppet_source: :undef ) }
           it { expect { subject.call }.to raise_error(Puppet::Error) }
         end
         context 'git_revision' do
@@ -256,10 +230,6 @@ describe 'webapp::python' do
         end
         context 'docroot_subfolder' do
           before { params.merge!( docroot_subfolder: true ) }
-          it { expect { subject.call }.to raise_error(Puppet::Error) }
-        end
-        context 'wsgi_script_aliases' do
-          before { params.merge!( wsgi_script_aliases: true ) }
           it { expect { subject.call }.to raise_error(Puppet::Error) }
         end
         context 'cron_jobs' do

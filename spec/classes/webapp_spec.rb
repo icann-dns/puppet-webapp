@@ -51,6 +51,12 @@ describe 'webapp' do
           it { is_expected.to compile }
           it { is_expected.to contain_webapp__python('test_app') }
         end
+        context 'html_apps' do
+          before { params.merge!( html_apps: { 'test_app' => {
+              'git_source' => 'test', 'domain_name' => 'test'}})}
+          it { is_expected.to compile }
+          it { is_expected.to contain_webapp__html('test_app') }
+        end
       end
 
       # You will have to correct any values that should be bool
@@ -61,6 +67,10 @@ describe 'webapp' do
         end
         context 'python_apps' do
           before { params.merge!( python_apps: true ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'html_apps' do
+          before { params.merge!( html_apps: true ) }
           it { expect { subject.call }.to raise_error(Puppet::Error) }
         end
       end
