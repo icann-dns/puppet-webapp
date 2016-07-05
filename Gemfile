@@ -13,6 +13,7 @@ group :test do
     gem 'puppet-syntax'
     gem 'puppet-lint'
     gem 'rspec-puppet-facts'
+    gem "mime-types-data", "<2.0"
 end
 
 group :integration do
