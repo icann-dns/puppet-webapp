@@ -62,7 +62,6 @@ define webapp::html (
     }
   } else {
     file { $approot:
-      ensure  => directory,
       source  => $puppet_source,
       purge   => false,
       recurse => true,
