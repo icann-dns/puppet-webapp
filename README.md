@@ -97,6 +97,7 @@ Main class, includes all other classes
 * `git_revision` (String, Default: 'master'): The revision/branch to clone
 * `git_user` (String, Default: 'root'): The user to use when cloning the git repo
 * `domain_name` (String, Default: undef, Required): The domwain name to use for the virtual host
+* `docroot_subfolder` (Path, Default: /): The folder, relative to the repo where web files are
 * `wsgi_script_aliases` (String, Default: 'webapp.wsgi'): file reletive to the webapp root dir to use as the wsgi script
 * `conr_jobs` (Hash, Default: {}): hash of cron types to configure
 

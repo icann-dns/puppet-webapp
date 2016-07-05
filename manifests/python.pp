@@ -7,6 +7,7 @@ define webapp::python (
   $git_revision        = 'master',
   $user                = 'www-data',
   $domain_name         = undef,
+  $docroot_subfolder   = '/',
   $wsgi_script_aliases = 'webapp.wsgi',
   $use_ssl             = false,
   $ssl_cert            = undef,
@@ -26,6 +27,7 @@ define webapp::python (
     fail("you must specify domain_name for webapp::define[${name}]")
   }
   validate_string($domain_name)
+  validate_absolute_path($docroot_subfolder)
   validate_string($wsgi_script_aliases)
   validate_bool($use_ssl)
   if $use_ssl {
@@ -64,7 +66,7 @@ define webapp::python (
   if $use_ssl {
     apache::vhost { "${domain_name}-redirect":
       servername      => $domain_name,
-      docroot         => "${approot}/",
+      docroot         => "${approot}${docroot_subfolder}",
       port            => 80,
       redirect_status => 'permanent',
       redirect_dest   => "https://${domain_name}/",
@@ -72,7 +74,7 @@ define webapp::python (
     }
     apache::vhost { "${domain_name}-ssl":
       servername                  => $domain_name,
-      docroot                     => "${approot}/",
+      docroot                     => "${approot}${docroot_subfolder}",
       port                        => 443,
       ssl                         => true,
       ssl_cert                    => $ssl_cert,
@@ -91,7 +93,7 @@ define webapp::python (
   } else {
     apache::vhost { $domain_name:
       servername                  => $domain_name,
-      docroot                     => "${approot}/",
+      docroot                     => "${approot}${docroot_subfolder}",
       wsgi_daemon_process         => "${name}-wsgi-webapp",
       port                        => 80,
       wsgi_daemon_process_options =>  {

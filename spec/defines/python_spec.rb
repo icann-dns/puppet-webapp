@@ -21,6 +21,7 @@ describe 'webapp::python' do
       #git_revision: "master",
       #git_user: "root",
       domain_name: 'test.example.com',
+      #docroot_subfolder: '/'
       #wsgi_script_aliases: "webapp.wsgi",
       #cron_jobs: {},
     }
@@ -156,6 +157,17 @@ describe 'webapp::python' do
               )
           end
         end
+        context 'docroot_subfolder' do
+          before { params.merge!( docroot_subfolder: '/foo' ) }
+          it { is_expected.to compile }
+          # Add Check to validate change was successful
+          it do
+            is_expected.to contain_apache__vhost('test.example.com')
+              .with(
+                'docroot'             => '/srv/www/test_app/foo',
+              )
+          end
+        end
         context 'wsgi_script_aliases' do
           before { params.merge!( wsgi_script_aliases: 'foobar' ) }
           it { is_expected.to compile }
@@ -236,6 +248,14 @@ describe 'webapp::python' do
         end
         context 'domain_name' do
           before { params.merge!( domain_name: true ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'docroot_subfolder' do
+          before { params.merge!( docroot_subfolder: true ) }
+          it { expect { subject.call }.to raise_error(Puppet::Error) }
+        end
+        context 'docroot_subfolder' do
+          before { params.merge!( docroot_subfolder: 'foo' ) }
           it { expect { subject.call }.to raise_error(Puppet::Error) }
         end
         context 'wsgi_script_aliases' do
