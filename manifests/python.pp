@@ -84,12 +84,13 @@ define webapp::python (
       ssl_key                     => $ssl_key,
       ssl_chain                   => $ssl_chain,
       ssl_protocol                => 'all -SSLv2 -SSLv3',
-      wsgi_daemon_process         => "${name}-wsgi-webapp",
+      wsgi_daemon_process         => $name,
+      wsgi_process_group          => $name,
       wsgi_script_aliases         => {
-        '/' => "${approot}/${wsgi_script_aliases}"
+        '/'                       => "${approot}/${wsgi_script_aliases}",
       },
       wsgi_daemon_process_options =>  {
-        'user' => $user
+        'user' => $user,
       },
       options                     => $options,
       manage_docroot              => false,
@@ -99,13 +100,14 @@ define webapp::python (
     apache::vhost { $domain_name:
       servername                  => $domain_name,
       docroot                     => "${approot}${docroot_subfolder}",
-      wsgi_daemon_process         => "${name}-wsgi-webapp",
+      wsgi_daemon_process         => $name,
+      wsgi_process_group          => $name,
       port                        => 80,
       wsgi_daemon_process_options =>  {
-        'user' => $user
+        'user' => $user,
       },
       wsgi_script_aliases         => {
-        '/' => "${approot}/${wsgi_script_aliases}"
+        '/' => "${approot}/${wsgi_script_aliases}",
       },
       options                     => $options,
       manage_docroot              => false,
