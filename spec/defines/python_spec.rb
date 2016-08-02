@@ -68,7 +68,7 @@ describe 'webapp::python' do
               'port'                => '80',
               'require'             => 'Vcsrepo[/srv/www/test_app]',
               'servername'          => 'test.example.com',
-              'wsgi_daemon_process' => 'test_app-wsgi-webapp',
+              'wsgi_daemon_process' => 'test_app',
               'wsgi_script_aliases' => /webapp.wsgi/,
               'options'             => ['Indexes','FollowSymLinks','MultiViews'],
             )
@@ -154,7 +154,7 @@ describe 'webapp::python' do
                 'port'                => '80',
                 'require'             => 'Vcsrepo[/srv/www/test_app]',
                 'servername'          => 'foo.example.com',
-                'wsgi_daemon_process' => 'test_app-wsgi-webapp',
+                'wsgi_daemon_process' => 'test_app',
               )
           end
         end
@@ -179,7 +179,7 @@ describe 'webapp::python' do
                 'port'                => '80',
                 'require'             => 'Vcsrepo[/srv/www/test_app]',
                 'servername'          => 'test.example.com',
-                'wsgi_daemon_process' => 'test_app-wsgi-webapp',
+                'wsgi_daemon_process' => 'test_app',
                 'wsgi_script_aliases' => /foobar/
               )
           end
@@ -210,7 +210,7 @@ describe 'webapp::python' do
                 'port'                => '443',
                 'require'             => 'Vcsrepo[/srv/www/test_app]',
                 'servername'          => 'test.example.com',
-                'wsgi_daemon_process' => 'test_app-wsgi-webapp',
+                'wsgi_daemon_process' => 'test_app',
                 'wsgi_script_aliases' => /webapp.wsgi/,
                 'ssl'                 => 'true',
                 'ssl_cert'            => '/foo.cert',
