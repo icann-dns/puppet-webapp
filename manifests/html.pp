@@ -63,6 +63,7 @@ define webapp::html (
   } else {
     file { $approot:
       source  => $puppet_source,
+      owner   => $user,
       purge   => false,
       recurse => true,
     }

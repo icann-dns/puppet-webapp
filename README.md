@@ -88,6 +88,7 @@ Main class, includes all other classes
 #### Public Defines
 
 * [webapp::python](#define-webapppython)
+* [webapp::html](#define-webapphtml)
 
 #### Define: `webapp::python`
 
@@ -99,8 +100,27 @@ Main class, includes all other classes
 * `domain_name` (String, Default: undef, Required): The domwain name to use for the virtual host
 * `docroot_subfolder` (Path, Default: /): The folder, relative to the repo where web files are
 * `wsgi_script_aliases` (String, Default: 'webapp.wsgi'): file reletive to the webapp root dir to use as the wsgi script
+* `use_ssl` (Bool, Default: false): if true configure apache with ssl
+* `ssl_cert` (Path, Default: undef): path to ssl certificat
+* `ssl_key` (Path, Default: undef): path to ssl key
+* `ssl_chain` (Path, Default: undef): path to ssl chain
+* `options` (Array, Default: ['Indexes','FollowSymLinks','MultiViews']): Array of apache vhost options
 * `conr_jobs` (Hash, Default: {}): hash of cron types to configure
 
+#### Define: `webapp::python`
+
+* `system_packages` (Array, Default: []): Install any stystem packages that the web app may depend on
+* `git_source` (String, Default: undef, Required): The source of the git repo
+* `git_revision` (String, Default: 'master'): The revision/branch to clone
+* `user` (String, Default: 'root'): The user to use when cloning the git repo and the permissions for the webroot
+* `domain_name` (String, Default: undef, Required): The domwain name to use for the virtual host
+* `docroot_subfolder` (Path, Default: /): The folder, relative to the repo where web files are
+* `use_ssl` (Bool, Default: false): if true configure apache with ssl
+* `ssl_cert` (Path, Default: undef): path to ssl certificat
+* `ssl_key` (Path, Default: undef): path to ssl key
+* `ssl_chain` (Path, Default: undef): path to ssl chain
+* `options` (Array, Default: ['Indexes','FollowSymLinks','MultiViews']): Array of apache vhost options
+* `conr_jobs` (Hash, Default: {}): hash of cron types to configure
 ## Limitations
 
 This is where you list OS compatibility, version compatibility, etc.
