@@ -17,6 +17,7 @@ group :test do
 end
 
 group :integration do
+    gem "json_pure", "<=1.8.3"
     gem "beaker"
     gem "beaker-rspec"
     gem "vagrant-wrapper"
