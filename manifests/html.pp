@@ -85,7 +85,6 @@ define webapp::html (
       ssl_cert       => $ssl_cert,
       ssl_key        => $ssl_key,
       ssl_chain      => $ssl_chain,
-      ssl_protocol   => 'all -SSLv2 -SSLv3',
       options        => $options,
       manage_docroot => false,
     }

@@ -83,7 +83,6 @@ define webapp::python (
       ssl_cert                    => $ssl_cert,
       ssl_key                     => $ssl_key,
       ssl_chain                   => $ssl_chain,
-      ssl_protocol                => 'all -SSLv2 -SSLv3',
       wsgi_daemon_process         => $name,
       wsgi_process_group          => $name,
       wsgi_script_aliases         => {
