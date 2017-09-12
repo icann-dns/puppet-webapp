@@ -1,3 +1,6 @@
+## 20 Jul 2016 0.1.5
+* Dont manage ssl ciphers
+
 ## 20 Jul 2016 0.1.4
 * fix permissions on puppet_src folder
 
