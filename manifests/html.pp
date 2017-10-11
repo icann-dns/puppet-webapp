@@ -1,54 +1,36 @@
 # == Class: webapp
 #
 define webapp::html (
-  $system_packages     = [],
-  $puppet_source       = undef,
-  $git_source          = undef,
-  $git_revision        = 'master',
-  $user                = 'www-data',
-  $domain_name         = undef,
-  $docroot_subfolder   = '/',
-  $use_ssl             = false,
-  $ssl_cert            = undef,
-  $ssl_key             = undef,
-  $ssl_chain           = undef,
-  $options             = ['Indexes','FollowSymLinks','MultiViews'],
-  $cron_jobs           = {},
+  String $domain_name,
+  Optional[Array] $system_packages          = [],
+  Optional[String] $puppet_source           = undef,
+  Optional[String] $git_source              = undef,
+  Optional[Stdlib::Absolutepath] $ssl_cert  = undef,
+  Optional[Stdlib::Absolutepath] $ssl_key   = undef,
+  Optional[Stdlib::Absolutepath] $ssl_chain = undef,
+  String $git_revision                      = 'master',
+  String $user                              = 'www-data',
+  Stdlib::Absolutepath $docroot_subfolder   = '/',
+  Boolean $use_ssl                          = false,
+  Array[String] $options                    = ['Indexes','FollowSymLinks','MultiViews'],
+  Hash $cron_jobs                           = {},
 ) {
-  validate_array($system_packages)
   if $git_source and $puppet_source {
     fail("you cannot specify git_source and puppet_source for webapp::define[${name}]")
   }
   if ! $git_source and ! $puppet_source {
     fail("you must specify git_source or puppet_source for webapp::define[${name}]")
   }
-  if $git_source {
-    validate_string($git_source)
-    validate_string($git_revision)
-  }
-  if $puppet_source {
-    validate_string($puppet_source)
-  }
-  validate_string($user)
-  if ! $domain_name {
-    fail("you must specify domain_name for webapp::html[${name}]")
-  }
-  validate_string($domain_name)
-  validate_absolute_path($docroot_subfolder)
-  validate_bool($use_ssl)
   if $use_ssl {
-    validate_absolute_path($ssl_cert)
-    validate_absolute_path($ssl_key)
+    unless $ssl_cert and $ssl_key {
+      fail('you must specify $ssl_key and $ssl_cert when $use_ssl==true')
+    }
   }
-  if $ssl_chain {
-    validate_absolute_path($ssl_chain)
-  }
-  validate_array($options)
-  validate_hash($cron_jobs)
-
   $approot = "${webapp::web_root}/${name}"
 
-  ensure_packages($system_packages)
+  if $system_packages {
+    ensure_packages($system_packages)
+  }
 
   if $git_source {
     ensure_packages(['git'])

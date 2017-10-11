@@ -1,52 +1,37 @@
 # == Class: webapp
 #
 define webapp::python (
-  $system_packages     = [],
-  $pip_packages        = [],
-  $git_source          = undef,
-  $git_revision        = 'master',
-  $user                = 'www-data',
-  $domain_name         = undef,
-  $docroot_subfolder   = '/',
-  $wsgi_script_aliases = 'webapp.wsgi',
-  $use_ssl             = false,
-  $ssl_cert            = undef,
-  $ssl_key             = undef,
-  $ssl_chain           = undef,
-  $options             = ['Indexes','FollowSymLinks','MultiViews'],
-  $cron_jobs           = {},
+  String $domain_name,
+  String $git_source,
+  Optional[Array] $system_packages          = [],
+  Optional[Array] $pip_packages             = [],
+  Optional[Stdlib::Absolutepath] $ssl_cert  = undef,
+  Optional[Stdlib::Absolutepath] $ssl_key   = undef,
+  Optional[Stdlib::Absolutepath] $ssl_chain = undef,
+  String $git_revision                      = 'master',
+  String $user                              = 'www-data',
+  Stdlib::Absolutepath $docroot_subfolder   = '/',
+  String $wsgi_script_aliases               = 'webapp.wsgi',
+  Boolean $use_ssl                          = false,
+  Array[String] $options                    = ['Indexes','FollowSymLinks','MultiViews'],
+  Hash $cron_jobs                           = {},
 ) {
-  validate_array($system_packages)
-  validate_array($pip_packages)
-  if ! $git_source {
-    fail("you must specify git_source for webapp::define[${name}]")
-  }
-  validate_string($git_source)
-  validate_string($git_revision)
-  validate_string($user)
-  if ! $domain_name {
-    fail("you must specify domain_name for webapp::define[${name}]")
-  }
-  validate_string($domain_name)
-  validate_absolute_path($docroot_subfolder)
-  validate_string($wsgi_script_aliases)
-  validate_bool($use_ssl)
   if $use_ssl {
-    validate_absolute_path($ssl_cert)
-    validate_absolute_path($ssl_key)
+    unless $ssl_cert and $ssl_key {
+      fail('you must specify ssl_cert and ssl_key if use_ssl==true')
+    }
   }
   if $ssl_chain {
     validate_absolute_path($ssl_chain)
   }
-  validate_array($options)
-  validate_hash($cron_jobs)
-
   $approot = "${webapp::web_root}/${name}"
 
   ensure_packages(['git'])
-  ensure_packages($system_packages)
+  if $system_packages {
+    ensure_packages($system_packages)
+  }
 
-  include apache::mod::wsgi
+  include ::apache::mod::wsgi
 
   vcsrepo { $approot:
     ensure   => latest,
@@ -62,8 +47,10 @@ define webapp::python (
     owner   => $user,
     require => Vcsrepo[$approot],
   }
-  $pip_packages_resources = unique_pip_packages($pip_packages, $approot, Vcsrepo[$approot])
-  create_resources(python::pip, $pip_packages_resources)
+  if $pip_packages {
+    $pip_packages_resources = unique_pip_packages($pip_packages, $approot, Vcsrepo[$approot])
+    create_resources(python::pip, $pip_packages_resources)
+  }
 
   if $use_ssl {
     apache::vhost { "${domain_name}-redirect":
