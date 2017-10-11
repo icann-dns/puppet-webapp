@@ -69,7 +69,7 @@ describe 'webapp::python' do
             require: 'Vcsrepo[/srv/www/test_app]',
             servername: 'test.example.com',
             wsgi_daemon_process: 'test_app',
-            wsgi_script_aliases: 'webapp.wsgi',
+            wsgi_script_aliases: %r{webapp.wsgi},
             options: %w[Indexes FollowSymLinks MultiViews]
           )
         end
@@ -171,7 +171,7 @@ describe 'webapp::python' do
               require: 'Vcsrepo[/srv/www/test_app]',
               servername: 'test.example.com',
               wsgi_daemon_process: 'test_app',
-              wsgi_script_aliases: 'foobar'
+              wsgi_script_aliases: %r{foobar}
             )
           end
         end
@@ -202,7 +202,7 @@ describe 'webapp::python' do
               require: 'Vcsrepo[/srv/www/test_app]',
               servername: 'test.example.com',
               wsgi_daemon_process: 'test_app',
-              wsgi_script_aliases: 'webapp.wsgi',
+              wsgi_script_aliases: %r{webapp.wsgi},
               ssl: 'true',
               ssl_cert: '/foo.cert',
               ssl_key: '/foo.key'

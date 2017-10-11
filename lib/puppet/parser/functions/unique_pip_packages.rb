@@ -4,7 +4,7 @@
 #
 module Puppet::Parser::Functions
   newfunction(
-    :uniquepip_packages, type: :rvalue, doc: <<-EOS
+    :unique_pip_packages, type: :rvalue, doc: <<-EOS
 This function converts an array of pip package names to a hash of python::pip objects to be used with create_resources()
 
 *Examples:*
