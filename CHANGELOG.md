@@ -1,3 +1,6 @@
+## 20 Jul 2016 0.2.0
+* notify apache if approot updates
+
 ## 20 Jul 2016 0.1.5
 * Dont manage ssl ciphers
 

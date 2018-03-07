@@ -35,12 +35,14 @@ define webapp::python (
     revision => $git_revision,
     source   => $git_source,
     require  => Package[$system_packages],
+    notify   => Service['httpd'],
   }
   python::virtualenv {$approot:
     ensure  => present,
     path    => ['/bin', '/usr/bin', '/usr/sbin', '/usr/local/bin'],
     owner   => $user,
     require => Vcsrepo[$approot],
+    notify  => Service['httpd'],
   }
   if $pip_packages {
     $pip_packages_resources = unique_pip_packages($pip_packages, $approot, Vcsrepo[$approot])
@@ -76,7 +78,6 @@ define webapp::python (
       options                     => $options,
       manage_docroot              => false,
       require                     => Vcsrepo[$approot],
-      subscribe                   => Vcsrepo[$approot],
     }
   } else {
     apache::vhost { $domain_name:
@@ -94,7 +95,6 @@ define webapp::python (
       options                     => $options,
       manage_docroot              => false,
       require                     => Vcsrepo[$approot],
-      subscribe                   => Vcsrepo[$approot],
     }
   }
   create_resources(cron, $cron_jobs)
