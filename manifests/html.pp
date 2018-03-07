@@ -27,10 +27,7 @@ define webapp::html (
     }
   }
   $approot = "${webapp::web_root}/${name}"
-
-  if $system_packages {
-    ensure_packages($system_packages)
-  }
+  ensure_packages($system_packages)
 
   if $git_source {
     ensure_packages(['git'])
@@ -42,6 +39,7 @@ define webapp::html (
       source   => $git_source,
       require  => Package[$system_packages],
     }
+    $apache_require = Vcsrepo[$approot]
   } else {
     file { $approot:
       source  => $puppet_source,
@@ -49,6 +47,7 @@ define webapp::html (
       purge   => false,
       recurse => true,
     }
+    $apache_require = File[$approot]
   }
   if $use_ssl {
     apache::vhost { "${domain_name}-redirect":
@@ -69,6 +68,7 @@ define webapp::html (
       ssl_chain      => $ssl_chain,
       options        => $options,
       manage_docroot => false,
+      subscribe      => $apache_require,
     }
   } else {
     apache::vhost { $domain_name:
@@ -77,6 +77,7 @@ define webapp::html (
       port           => 80,
       options        => $options,
       manage_docroot => false,
+      subscribe      => $apache_require,
     }
   }
   create_resources(cron, $cron_jobs)

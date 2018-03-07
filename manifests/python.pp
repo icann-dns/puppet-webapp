@@ -21,15 +21,10 @@ define webapp::python (
       fail('you must specify ssl_cert and ssl_key if use_ssl==true')
     }
   }
-  if $ssl_chain {
-    validate_absolute_path($ssl_chain)
-  }
   $approot = "${webapp::web_root}/${name}"
 
   ensure_packages(['git'])
-  if $system_packages {
-    ensure_packages($system_packages)
-  }
+  ensure_packages($system_packages)
 
   include ::apache::mod::wsgi
 
@@ -81,6 +76,7 @@ define webapp::python (
       options                     => $options,
       manage_docroot              => false,
       require                     => Vcsrepo[$approot],
+      subscribe                   => Vcsrepo[$approot],
     }
   } else {
     apache::vhost { $domain_name:
@@ -98,6 +94,7 @@ define webapp::python (
       options                     => $options,
       manage_docroot              => false,
       require                     => Vcsrepo[$approot],
+      subscribe                   => Vcsrepo[$approot],
     }
   }
   create_resources(cron, $cron_jobs)
