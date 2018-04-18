@@ -3,18 +3,19 @@
 define webapp::python (
   String $domain_name,
   String $git_source,
-  Optional[Array] $system_packages          = [],
-  Optional[Array] $pip_packages             = [],
-  Optional[Stdlib::Absolutepath] $ssl_cert  = undef,
-  Optional[Stdlib::Absolutepath] $ssl_key   = undef,
-  Optional[Stdlib::Absolutepath] $ssl_chain = undef,
-  String $git_revision                      = 'master',
-  String $user                              = 'www-data',
-  Stdlib::Absolutepath $docroot_subfolder   = '/',
-  String $wsgi_script_aliases               = 'webapp.wsgi',
-  Boolean $use_ssl                          = false,
-  Array[String] $options                    = ['Indexes','FollowSymLinks','MultiViews'],
-  Hash $cron_jobs                           = {},
+  Optional[Array] $system_packages             = [],
+  Optional[Array] $pip_packages                = [],
+  Optional[Stdlib::Absolutepath] $ssl_cert     = undef,
+  Optional[Stdlib::Absolutepath] $ssl_key      = undef,
+  Optional[Stdlib::Absolutepath] $ssl_chain    = undef,
+  Optional[Webapp::Init_script]  $init_scripts = undef,
+  String $git_revision                         = 'master',
+  String $user                                 = 'www-data',
+  Stdlib::Absolutepath $docroot_subfolder      = '/',
+  String $wsgi_script_aliases                  = 'webapp.wsgi',
+  Boolean $use_ssl                             = false,
+  Array[String] $options                       = ['Indexes','FollowSymLinks','MultiViews'],
+  Hash $cron_jobs                              = {},
 ) {
   if $use_ssl {
     unless $ssl_cert and $ssl_key {
@@ -47,6 +48,14 @@ define webapp::python (
   if $pip_packages {
     $pip_packages_resources = unique_pip_packages($pip_packages, $approot, Vcsrepo[$approot])
     create_resources(python::pip, $pip_packages_resources)
+  }
+  if !empty($init_scripts) {
+    $init_scripts.each |$cmd, $creates| {
+      exec {$cmd:
+        creates => $creates,
+        require => [Python::Virtualenv[$approot],Python::Pip[$pip_packages_resources]],
+      }
+    }
   }
 
   if $use_ssl {
