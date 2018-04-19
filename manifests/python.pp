@@ -51,9 +51,13 @@ define webapp::python (
   }
   if !empty($init_scripts) {
     $init_scripts.each |$cmd, $creates| {
-      exec {$cmd:
-        creates => $creates,
-        require => [Python::Virtualenv[$approot],Python::Pip[$pip_packages_resources]],
+      exec {"${approot}/${cmd}":
+        creates => "${approot}/${creates}",
+        cwd     => $approot,
+        require => [
+          Python::Virtualenv[$approot],
+          Python::Pip[$pip_packages_resources]
+        ],
       }
     }
   }
