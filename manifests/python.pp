@@ -8,7 +8,7 @@ define webapp::python (
   Optional[Stdlib::Absolutepath] $ssl_cert     = undef,
   Optional[Stdlib::Absolutepath] $ssl_key      = undef,
   Optional[Stdlib::Absolutepath] $ssl_chain    = undef,
-  Optional[Webapp::Init_script]  $init_scripts = undef,
+  Optional[Hash[String, String]] $init_scripts = undef,
   String $git_revision                         = 'master',
   String $user                                 = 'www-data',
   Stdlib::Absolutepath $docroot_subfolder      = '/',
