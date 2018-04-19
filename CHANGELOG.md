@@ -1,3 +1,6 @@
+## 20 Jul 2016 0.3.0
+* Allow init script for python apps
+
 ## 20 Jul 2016 0.2.0
 * notify apache if approot updates
 
