@@ -56,7 +56,7 @@ define webapp::python (
         cwd     => $approot,
         require => [
           Python::Virtualenv[$approot],
-          Python::Pip[$pip_packages_resources]
+          Python::Pip[$pip_packages_resources.keys()]
         ],
       }
     }
