@@ -27,7 +27,7 @@ define webapp::python (
   ensure_packages(['git'])
   ensure_packages($system_packages)
 
-  include ::apache::mod::wsgi
+  include apache::mod::wsgi
 
   vcsrepo { $approot:
     ensure   => latest,
@@ -38,9 +38,8 @@ define webapp::python (
     require  => Package[$system_packages],
     notify   => Service['httpd'],
   }
-  python::virtualenv {$approot:
+  python::pyvenv { $approot:
     ensure  => present,
-    path    => ['/bin', '/usr/bin', '/usr/sbin', '/usr/local/bin'],
     owner   => $user,
     require => Vcsrepo[$approot],
     notify  => Service['httpd'],
@@ -51,7 +50,7 @@ define webapp::python (
   }
   if !empty($init_scripts) {
     $init_scripts.each |$cmd, $creates| {
-      exec {"${approot}/${cmd}":
+      exec { "${approot}/${cmd}":
         creates => "${approot}/${creates}",
         cwd     => $approot,
         require => [
@@ -85,7 +84,7 @@ define webapp::python (
       wsgi_script_aliases         => {
         '/'                       => "${approot}/${wsgi_script_aliases}",
       },
-      wsgi_daemon_process_options =>  {
+      wsgi_daemon_process_options => {
         'user' => $user,
       },
       options                     => $options,
@@ -99,7 +98,7 @@ define webapp::python (
       wsgi_daemon_process         => $name,
       wsgi_process_group          => $name,
       port                        => 80,
-      wsgi_daemon_process_options =>  {
+      wsgi_daemon_process_options => {
         'user' => $user,
       },
       wsgi_script_aliases         => {
