@@ -1,3 +1,7 @@
+## 16 Apr 2024 0.4.0
+* Modernise code syntax
+* Add documentations
+
 ## 20 Jul 2016 0.3.0
 * Allow init script for python apps
 
