@@ -1,14 +1,22 @@
-# == Class: webapp
-#
+# @summary wrapper class to create vhosts
+# @param web_root the main web root
+# @param python_apps a hash of webapp::python resources to create
+# @param html_apps a hash of webapp::html resources to create
 class webapp (
-  Stdlib::Absolutepath $web_root    = $::webapp::params::web_root,
+  Stdlib::Absolutepath $web_root    = '/srv/www',
   Hash                 $python_apps = {},
   Hash                 $html_apps   = {},
-) inherits webapp::params {
-
-  include ::apache
+) {
+  include apache
   ensure_resource('file', $web_root, { 'ensure' => 'directory', mode => '0777' })
-  create_resources(webapp::python, $python_apps)
-  create_resources(webapp::html, $html_apps)
-
+  $python_apps.each |$title, $params| {
+    webapp::python { $title:
+      * => $params,
+    }
+  }
+  $html_apps.each |$title, $params| {
+    webapp::html { $title:
+      * => $params,
+    }
+  }
 }

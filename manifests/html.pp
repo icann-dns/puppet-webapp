@@ -1,8 +1,21 @@
-# == Class: webapp
+# @summary resource to create simple html web sites
 #
+# @param domain_name the domain name of the website
+# @param system_packages A list if system packages to install
+# @param puppet_source The puppet source location of the site
+# @param git_source The git source location of the site
+# @param ssl_cert The ssl cert to use is ssl is in user
+# @param ssl_key The ssl key to use is ssl is in user
+# @param ssl_chain The ssl chain to use is ssl is in user
+# @param git_revision The git revision to use
+# @param user The user to use
+# @param docroot_subfolder The doc root subfolder
+# @param use_ssl If we use ssl
+# @param options Additional vhost options
+# @param cron_jobs A list f cron jobs for the site
 define webapp::html (
   String $domain_name,
-  Optional[Array] $system_packages          = [],
+  Array[String] $system_packages            = [],
   Optional[String] $puppet_source           = undef,
   Optional[String] $git_source              = undef,
   Optional[Stdlib::Absolutepath] $ssl_cert  = undef,
@@ -78,5 +91,9 @@ define webapp::html (
       manage_docroot => false,
     }
   }
-  create_resources(cron, $cron_jobs)
+  $cron_jobs.each |$title, $params| {
+    cron { $title:
+      * => $params,
+    }
+  }
 }

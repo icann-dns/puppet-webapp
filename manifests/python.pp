@@ -1,19 +1,37 @@
-# == Class: webapp
-#
+# @summary resource to create simple python web sites
+# @param domain_name the domain name of the website
+# @param system_packages A list if system packages to install
+# @param pip_packages A list if pip packages to install
+# @param git_source The git source location of the site
+# @param ssl_cert The ssl cert to use is ssl is in user
+# @param ssl_key The ssl key to use is ssl is in user
+# @param ssl_chain The ssl chain to use is ssl is in user
+# @param init_scripts a lit of init scripts e.g. db_create screips to run after install
+# @param git_revision The git revision to use
+# @param user The user to use
+# @param git_user The user to use for git operations
+# @param wsgi_script_aliases the file used for the wsgi script
+# @param docroot_subfolder The doc root subfolder
+# @param use_ssl If we use ssl
+# @param log_dir
+# @param options Additional vhost options
+# @param cron_jobs A list f cron jobs for the site
 define webapp::python (
   String $domain_name,
   String $git_source,
-  Optional[Array] $system_packages             = [],
-  Optional[Array] $pip_packages                = [],
+  Array[String] $system_packages               = [],
+  Array[String] $pip_packages                  = [],
   Optional[Stdlib::Absolutepath] $ssl_cert     = undef,
   Optional[Stdlib::Absolutepath] $ssl_key      = undef,
   Optional[Stdlib::Absolutepath] $ssl_chain    = undef,
-  Optional[Hash[String, String]] $init_scripts = undef,
+  Hash[String, String]           $init_scripts = {},
   String $git_revision                         = 'master',
   String $user                                 = 'www-data',
+  String $git_user                             = $user,
   Stdlib::Absolutepath $docroot_subfolder      = '/',
   String $wsgi_script_aliases                  = 'webapp.wsgi',
   Boolean $use_ssl                             = false,
+  Optional[Stdlib::Unixpath] $log_dir          = undef,
   Array[String] $options                       = ['Indexes','FollowSymLinks','MultiViews'],
   Hash $cron_jobs                              = {},
 ) {
@@ -27,7 +45,15 @@ define webapp::python (
   ensure_packages(['git'])
   ensure_packages($system_packages)
 
-  include ::apache::mod::wsgi
+  include apache::mod::wsgi
+
+  if $log_dir {
+    file { $log_dir:
+      ensure => directory,
+      owner  => $user,
+      group  => $user,
+    }
+  }
 
   vcsrepo { $approot:
     ensure   => latest,
@@ -38,24 +64,25 @@ define webapp::python (
     require  => Package[$system_packages],
     notify   => Service['httpd'],
   }
-  python::virtualenv {$approot:
+  $venv_dir = "${approot}/venv"
+  python::pyvenv { $venv_dir:
     ensure  => present,
-    path    => ['/bin', '/usr/bin', '/usr/sbin', '/usr/local/bin'],
     owner   => $user,
     require => Vcsrepo[$approot],
     notify  => Service['httpd'],
   }
   if $pip_packages {
-    $pip_packages_resources = unique_pip_packages($pip_packages, $approot, Vcsrepo[$approot])
+    $pip_packages_resources = unique_pip_packages($pip_packages, $venv_dir, Vcsrepo[$approot])
     create_resources(python::pip, $pip_packages_resources)
   }
   if !empty($init_scripts) {
     $init_scripts.each |$cmd, $creates| {
-      exec {"${approot}/${cmd}":
-        creates => "${approot}/${creates}",
-        cwd     => $approot,
-        require => [
-          Python::Virtualenv[$approot],
+      exec { "${approot}/${cmd}":
+        creates   => "${approot}/${creates}",
+        cwd       => $approot,
+        subscribe => Vcsrepo[$approot],
+        require   => [
+          Python::Pyvenv[$venv_dir],
           Python::Pip[$pip_packages_resources.keys()]
         ],
       }
@@ -83,10 +110,12 @@ define webapp::python (
       wsgi_daemon_process         => $name,
       wsgi_process_group          => $name,
       wsgi_script_aliases         => {
-        '/'                       => "${approot}/${wsgi_script_aliases}",
+        '/'           => "${approot}/${wsgi_script_aliases}",
       },
-      wsgi_daemon_process_options =>  {
-        'user' => $user,
+      wsgi_daemon_process_options => {
+        'user'        => $user,
+        'python-home' => $venv_dir,
+        'python-path' => $approot,
       },
       options                     => $options,
       manage_docroot              => false,
@@ -99,8 +128,9 @@ define webapp::python (
       wsgi_daemon_process         => $name,
       wsgi_process_group          => $name,
       port                        => 80,
-      wsgi_daemon_process_options =>  {
-        'user' => $user,
+      wsgi_daemon_process_options => {
+        'user'        => $user,
+        'python-home' => $venv_dir,
       },
       wsgi_script_aliases         => {
         '/' => "${approot}/${wsgi_script_aliases}",
