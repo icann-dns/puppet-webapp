@@ -107,15 +107,16 @@ define webapp::python (
       ssl_cert                    => $ssl_cert,
       ssl_key                     => $ssl_key,
       ssl_chain                   => $ssl_chain,
-      wsgi_daemon_process         => $name,
+      wsgi_daemon_process         => {
+        $name => {
+          'user'        => $user,
+          'python-home' => $venv_dir,
+          'python-path' => $approot,
+        },
+      },
       wsgi_process_group          => $name,
       wsgi_script_aliases         => {
         '/'           => "${approot}/${wsgi_script_aliases}",
-      },
-      wsgi_daemon_process_options => {
-        'user'        => $user,
-        'python-home' => $venv_dir,
-        'python-path' => $approot,
       },
       options                     => $options,
       manage_docroot              => false,
@@ -125,13 +126,14 @@ define webapp::python (
     apache::vhost { $domain_name:
       servername                  => $domain_name,
       docroot                     => "${approot}${docroot_subfolder}",
-      wsgi_daemon_process         => $name,
+      wsgi_daemon_process         => {
+        $name => {
+          'user'        => $user,
+          'python-home' => $venv_dir,
+        },
+      },
       wsgi_process_group          => $name,
       port                        => 80,
-      wsgi_daemon_process_options => {
-        'user'        => $user,
-        'python-home' => $venv_dir,
-      },
       wsgi_script_aliases         => {
         '/' => "${approot}/${wsgi_script_aliases}",
       },
