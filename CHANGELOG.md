@@ -1,3 +1,5 @@
+## 23 Jun 2025 0.5.0
+* drop wsgi_daemon_process_options. this param is deprecated. switch to using wsgi_daemon_process hash
 ## 16 Apr 2024 0.4.0
 * Modernise code syntax
 * Add documentations
